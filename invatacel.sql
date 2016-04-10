@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 10, 2016 at 08:56 PM
+-- Generation Time: Apr 10, 2016 at 09:01 PM
 -- Server version: 10.1.10-MariaDB
 -- PHP Version: 5.6.19
 
@@ -1090,7 +1090,6 @@ INSERT INTO `wp_usermeta` (`umeta_id`, `user_id`, `meta_key`, `meta_value`) VALU
 (89, 2, 'wp_dashboard_quick_press_last_post_id', '8'),
 (93, 1, 'wp_user-settings', 'libraryContent=browse'),
 (94, 1, 'wp_user-settings-time', '1460309690'),
-(95, 2, 'session_tokens', 'a:1:{s:64:"3904853168985a6ea08d1cd728102da23f9d381089d5e6bbd070117af2e448b2";a:4:{s:10:"expiration";i:1460484016;s:2:"ip";s:3:"::1";s:2:"ua";s:115:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36";s:5:"login";i:1460311216;}}'),
 (96, 2, 'wp_user-settings', 'libraryContent=upload&editor=tinymce'),
 (97, 2, 'wp_user-settings-time', '1460311834'),
 (99, 2, 'nav_menu_recently_edited', '2'),
