@@ -1,0 +1,55 @@
+-----04-10-2016 @ 18:41:11 ------
+
+				SELECT count(c.ID) as c, DATE_FORMAT( c.post_date, '%Y-%m-%d') as d
+				FROM wp_posts c
+				WHERE 1
+				AND c.post_status IN('publish', 'pending') AND c.post_type = 'lp_course'
+				GROUP BY d
+				HAVING d BETWEEN '2016-04-04' AND '2016-04-10'
+				ORDER BY d ASC
+			
+-----04-10-2016 @ 18:41:11 ------
+
+				SELECT count(c.ID) as c, DATE_FORMAT( c.post_date, '%Y-%m-%d') as d
+				FROM wp_posts c
+				WHERE 1
+				AND c.post_status = 'publish' AND c.post_type = 'lp_course'
+				GROUP BY d
+				HAVING d BETWEEN '2016-04-04' AND '2016-04-10'
+				ORDER BY d ASC
+			
+-----04-10-2016 @ 18:41:11 ------
+
+				SELECT count(c.ID) as c, DATE_FORMAT( c.post_date, '%Y-%m-%d') as d
+				FROM wp_posts c
+				INNER JOIN wp_postmeta cm ON cm.post_id = c.ID AND cm.meta_key = '_lp_payment' AND cm.meta_value = 'yes'
+				WHERE 1
+				AND c.post_status = 'publish' AND c.post_type = 'lp_course'
+				GROUP BY d
+				HAVING d BETWEEN '2016-04-04' AND '2016-04-10'
+				ORDER BY d ASC
+			
+-----04-10-2016 @ 18:41:14 ------
+
+				SELECT count(o.ID) as c, DATE_FORMAT( o.post_date, '%Y-%m-%d') as d
+				FROM wp_posts o
+				WHERE 1
+				AND o.post_status IN('lp-completed') AND o.post_type = 'lp_order'
+				GROUP BY d
+				HAVING d BETWEEN '2016-04-04' AND '2016-04-10'
+				ORDER BY d ASC
+			
+-----04-10-2016 @ 18:41:14 ------
+
+				SELECT count(o.ID) as c, DATE_FORMAT( o.post_date, '%Y-%m-%d') as d
+				FROM wp_posts o
+				WHERE 1
+				AND o.post_status IN('lp-pending', 'lp-processing') AND o.post_type = 'lp_order'
+				GROUP BY d
+				HAVING d BETWEEN '2016-04-04' AND '2016-04-10'
+				ORDER BY d ASC
+			
+-----04-10-2016 @ 18:43:37 ------
+Before delete post 14
+-----04-10-2016 @ 18:44:58 ------
+Before delete post 26
