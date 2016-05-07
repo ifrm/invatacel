@@ -50,7 +50,6 @@ class LP_Cart {
 				$this->remove_item( $item_id );
 			}
 		}
-
 		LP_Request_Handler::register( 'add-course-to-cart', array( $this, 'add_to_cart' ), 20 );
 		LP_Request_Handler::register( 'remove-cart-item', array( $this, 'remove_item' ), 20 );
 		add_action( 'learn_press_add_to_cart', array( $this, 'calculate_totals' ), 10 );
@@ -115,10 +114,10 @@ class LP_Cart {
 					$redirect = add_query_arg( 'next', 'enroll-course', $redirect );
 				}
 				learn_press_add_notice( __( 'Please login to continue process.', 'learn_press' ) );
-				$checkout_results['redirect'] = $redirect;
+				$checkout_results['redirect'] = apply_filters( 'learn_press_no_checkout_free_course_redirect', $redirect );
 			} else {
 				add_filter( 'learn_press_checkout_success_result', '_learn_press_checkout_auto_enroll_free_course', 10, 2 );
-				$checkout_results = LP_Checkout::instance()->process_checkout();
+				$checkout_results = LP_Checkout::instance()->process_checkout( );
 			}
 			if ( is_ajax() ) {
 				learn_press_send_json(
@@ -208,6 +207,7 @@ class LP_Cart {
 			$this->_cart_content['subtotal'] = $subtotal;
 			$this->_cart_content['total']    = $subtotal;
 		}
+
 		$this->update_session();
 	}
 
@@ -233,7 +233,6 @@ class LP_Cart {
 		if ( !did_action( 'learn_press_get_cart_from_session' ) ) {
 			$this->get_cart_from_session();
 		}
-
 		return $this->_cart_content['items'];
 	}
 

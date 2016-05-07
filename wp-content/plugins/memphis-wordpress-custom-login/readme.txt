@@ -3,8 +3,8 @@ Contributors: bhaldie
 Donate link: http://www.kingofnothing.net/
 Tags: plugin,google,javascript,memphis,bhaldie, css, wordpress login,wp-login, customize
 Requires at least: 3.0.4
-Tested up to: 4.4.2
-Stable tag: 3.2.2
+Tested up to: 4.5
+Stable tag: 3.2.3
 
 A simple way to control your WordPress Login Page.
 
@@ -28,9 +28,10 @@ You have the ability to change the look and feel of your WordPress blog, giving 
 * Hide back to blog link
 * hide register link/ forgot password link
 
-== Whats New With Version 3.2.2 =
+== Whats New With Version 3.2.3 =
 
 * *Fix* - Minor bug fixes.
+* *Update* - Tested with version 4.5
 
 == Installation ==
 
@@ -50,6 +51,15 @@ Once uploaded the configuration menu is located in the "Tools" menu with the hea
 4. screenshot-4.png
 
 == Changelog ==
+
+= 3.2.3
+
+* *Fix* - Minor bug fixes.
+* *Update* - Tested with version 4.5
+
+= 3.2.2 =
+
+* *Fix* - Minor bug fixes.
 
 = 3.2.1 =
 

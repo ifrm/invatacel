@@ -45,7 +45,6 @@ if ( !class_exists( 'LP_Quiz_Post_Type' ) ) {
 		 * @param $post_id
 		 */
 		function delete_quiz_questions( $post_id ) {
-			LP_Debug::instance()->add( 'Before delete post ' . $post_id );
 			global $wpdb;
 			$query = $wpdb->prepare( "
 				DELETE FROM {$wpdb->prefix}learnpress_quiz_questions
@@ -182,6 +181,28 @@ if ( !class_exists( 'LP_Quiz_Post_Type' ) ) {
 								),
 								'std'     => 'no'
 							),
+							array(
+								'name'    => __( 'Show hint', 'learnpress' ),
+								'id'      => "{$prefix}show_hint",
+								'type'    => 'radio',
+								'desc'    => __( 'Show button to hint answer', 'learnpress' ),
+								'options' => array(
+									'no'  => __( 'No', 'learnpress' ),
+									'yes' => __( 'Yes', 'learnpress' )
+								),
+								'std'     => 'no'
+							),
+							array(
+								'name'    => __( 'Show explanation', 'learnpress' ),
+								'id'      => "{$prefix}show_explanation",
+								'type'    => 'radio',
+								'desc'    => __( 'Show button to explain answer', 'learnpress' ),
+								'options' => array(
+									'no'  => __( 'No', 'learnpress' ),
+									'yes' => __( 'Yes', 'learnpress' )
+								),
+								'std'     => 'no'
+							)
 						)
 					)
 				)

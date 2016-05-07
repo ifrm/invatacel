@@ -113,6 +113,9 @@ abstract class LP_Abstract_Course {
 						$single = true;
 					}
 					$value = get_post_meta( $this->id, '_lp_' . $key, $single );
+					if ( ( $key == 'price' || $key == 'total' ) && get_post_meta( $this->id, '_lp_payment', true ) != 'yes' ) {
+						$value = 0;
+					}
 			}
 			if ( !empty( $value ) ) {
 				$this->$key = $value;
@@ -320,7 +323,7 @@ abstract class LP_Abstract_Course {
 		if ( $this->_count_users === null || $force ) {
 			$query              = $wpdb->prepare( "
 				SELECT count(o.ID)
-				FROM wp_posts o
+				FROM {$wpdb->posts} o
 				INNER JOIN {$wpdb->learnpress_order_items} oi ON oi.order_id = o.ID
 				INNER JOIN {$wpdb->learnpress_order_itemmeta} oim ON oim.learnpress_order_item_id = oi.order_item_id
 				AND oim.meta_key = %s AND oim.meta_value = %d
@@ -368,7 +371,7 @@ abstract class LP_Abstract_Course {
 		$instructor = $this->get_instructor();
 		$html       = sprintf(
 			'<a href="%s">%s</a>',
-			apply_filters( 'learn_press_instructor_profile_link', '#', null, $this->id ),
+			learn_press_user_profile_link( $this->post->post_author ),
 			$instructor
 		);
 		return apply_filters( 'learn_press_course_instructor_html', $html, $this->post->post_author, $this->id );
@@ -415,7 +418,7 @@ abstract class LP_Abstract_Course {
 	 */
 	public function get_price() {
 		$price = $this->price;
-		if ( !$price || 'no' == $this->payment ) {
+		if ( !$price || 'yes' != $this->payment ) {
 			$price = 0;
 		} else {
 			$price = floatval( $price );
@@ -461,14 +464,22 @@ abstract class LP_Abstract_Course {
 	 *
 	 * @return array
 	 */
-	function get_lessons() {
-		$items   = $this->get_curriculum_items(
+	function get_lessons( $args = null ) {
+		$args            = wp_parse_args(
+			$args,
 			array(
-				'force' => false,
-				'group' => true,
+				'field' => ''
 			)
 		);
-		$lessons = !empty( $items['lessons'] ) ? $items['lessons'] : false;
+		$curriculum_args = array_merge(
+			array(
+				'force' => false,
+				'group' => true
+			),
+			$args
+		);
+		$items           = $this->get_curriculum_items( $curriculum_args );
+		$lessons         = !empty( $items['lessons'] ) ? $items['lessons'] : false;
 		return apply_filters( 'learn_press_course_lessons', $lessons, $this );
 	}
 
@@ -752,23 +763,27 @@ abstract class LP_Abstract_Course {
 
 	function _evaluate_course_by_lesson( $user_id ) {
 		static $evaluate_course_by_lesson = array();
-		if ( !array_key_exists( $this->id, $evaluate_course_by_lesson ) ) {
+		$key = $this->id . '-' . $user_id;
+		if ( !array_key_exists( $key, $evaluate_course_by_lesson ) ) {
 			global $wpdb;
-			$course_lessons = $this->get_lessons();
+			$course_lessons = $this->get_lessons( array( 'field' => 'ID' ) );
 			if ( !$course_lessons ) {
 				return 1;
 			}
-			$query                                = $wpdb->prepare( "
-				SELECT count(user_id)
-				FROM {$wpdb->prefix}learnpress_user_lessons ul
-				INNER JOIN {$wpdb->posts} l ON l.ID = ul.lesson_id
-				WHERE ul.user_id = %d
-				AND status = %s
-			", $user_id, 'completed' );
-			$completed_lessons                    = $wpdb->get_var( $query );
-			$evaluate_course_by_lesson[$this->id] = $completed_lessons / sizeof( $course_lessons );
+			$query = $wpdb->prepare( "
+					SELECT count(ul.lesson_id)
+					FROM {$wpdb->prefix}learnpress_user_lessons ul
+					INNER JOIN {$wpdb->posts} l ON l.ID = ul.lesson_id
+					WHERE ul.user_id = %d
+					AND status = %s
+					AND ul.course_id = %d
+					AND ul.lesson_id IN(" . join( ",", $course_lessons ) . ")
+				", $user_id, 'completed', $this->id );
+
+			$completed_lessons               = $wpdb->get_var( $query );
+			$evaluate_course_by_lesson[$key] = min( $completed_lessons / sizeof( $course_lessons ), 1 );
 		}
-		return apply_filters( 'learn_press_evaluation_course_lesson', $evaluate_course_by_lesson[$this->id], $this->id, $user_id );
+		return apply_filters( 'learn_press_evaluation_course_lesson', $evaluate_course_by_lesson[$key], $this->id, $user_id );
 	}
 
 	function _evaluate_course_by_quiz( $user_id ) {

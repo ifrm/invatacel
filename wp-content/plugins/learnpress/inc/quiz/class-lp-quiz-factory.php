@@ -14,6 +14,56 @@ class LP_Quiz_Factory {
 		foreach ( $actions as $k => $v ) {
 			LP_Request_Handler::register_ajax( $k, array( __CLASS__, $v ) );
 		}
+		/*
+		add_action( 'learn_press_before_user_start_quiz', array( __CLASS__, 'xxx' ), 5, 3 );
+		add_action( 'init', array( __CLASS__, 'yyy' ) );
+		add_action( 'init', array( __CLASS__, '_delete_anonymous_users' ) );*/
+	}
+
+	static function yyy() {
+		$user = learn_press_get_current_user();
+		if ( $user instanceof LP_User_Guest ) {
+			$expire  = get_user_meta( $user->id, '_lp_anonymous_user_expire', true );
+			$current = time();
+			if ( ( $current - ( $expire - 60 ) ) < 10 ) {
+				update_user_meta( $user->id, '_lp_anonymous_user_expire', $current + 60 );
+			}
+		}
+	}
+
+	static function _delete_anonymous_users() {
+		global $wpdb;
+		$sql = $wpdb->prepare( "
+		DELETE a, b FROM $wpdb->users a, $wpdb->usermeta b
+		WHERE a.ID = b.user_id
+		AND b.meta_key = %s
+		AND b.meta_value < %d
+		", '_lp_anonymous_user_expire', time() );
+		//$wpdb->query( $sql );
+	}
+
+	static function xxx( $start, $quiz_id, $user_id ) {
+		$start  = false;
+		$x      = 60;
+		$expire = $x + time();
+		$user   = get_user_by( 'id', $user_id );
+		if ( $user ) {
+			if ( $expire_time = get_user_meta( $user_id, '_lp_anonymous_user_expire', true ) ) {
+				$current_time = time();
+				if ( $expire_time - $current_time <= 0 ) {
+					update_user_meta( $user_id, '_lp_anonymous_user_expire', $expire );
+				}
+			}
+			return $start;
+		}
+		$new_user_id = wp_create_user( uniqid( 'user_' . time() ), '12345' );
+		if ( $new_user_id ) {
+			global $wpdb;
+			if ( $wpdb->update( $wpdb->users, array( 'ID' => $user_id ), array( 'ID' => $new_user_id ) ) ) {
+				update_user_meta( $user_id, '_lp_anonymous_user_expire', $expire );
+			}
+		}
+		return $start;
 	}
 
 	static function start_quiz() {
@@ -23,6 +73,7 @@ class LP_Quiz_Factory {
 
 		self::_verify_nonce();
 
+		LP()->set_object( 'quiz', $quiz, true );
 		$user = learn_press_get_current_user();
 		if ( $quiz->is_require_enrollment() && $user->is( 'guest' ) ) {
 			learn_press_send_json(
@@ -59,15 +110,28 @@ class LP_Quiz_Factory {
 			default:
 				$result           = $user->start_quiz();
 				$current_question = !empty( $result['current_question'] ) ? $result['current_question'] : $user->get_current_question_id( $quiz_id );
+				$question         = LP_Question_Factory::get_question( $current_question );
+				if ( $question ) {
+					$quiz->current_question = $question;
+					ob_start();
+					$question->render();
+					$content = ob_get_clean();
+				} else {
+					$content = '';
+				}
 				learn_press_send_json(
 					array(
-						'result'   => 'success',
+						'result'   => $result === false ? 'fail' : 'success',
+						'message'  => $result === false ? array(
+							'title'   => __( 'Error', 'learnpress' ),
+							'message' => __( 'Start quiz failed', 'learnpress' )
+						) : '',
 						'data'     => $result,
 						'question' =>
 							array(
 								'id'        => $current_question,
 								'permalink' => learn_press_get_user_question_url( $quiz_id, $current_question ),
-								'content'   => LP_Question_Factory::fetch_question_content( $current_question )
+								'content'   => $content
 							)
 					)
 				);
@@ -80,6 +144,8 @@ class LP_Quiz_Factory {
 		$quiz    = LP_Quiz::get_quiz( $quiz_id );
 		$user    = learn_press_get_current_user();
 		self::_verify_nonce();
+		LP()->set_object( 'quiz', $quiz, true );
+
 		if ( $user->get_quiz_status( $quiz->id ) != 'completed' ) {
 			$user->finish_quiz( $quiz_id );
 			$response = array(
@@ -93,13 +159,14 @@ class LP_Quiz_Factory {
 		$quiz_id = learn_press_get_request( 'quiz_id' );
 		$user    = learn_press_get_current_user();
 		self::_verify_nonce();
+
+		LP()->set_object( 'quiz', LP_Quiz::get_quiz( $quiz_id ), true );
+
 		if ( $user->get_quiz_status( $quiz_id ) == 'completed' ) {
 			$response = $user->retake_quiz( $quiz_id );
-			echo 'xxxxxxxxxxxxx';
 			learn_press_send_json( $response );
-
 		}
-		echo 'yyyyyyyyyy';
+
 		learn_press_send_json(
 			array(
 				'result'  => 'error',
@@ -118,6 +185,7 @@ class LP_Quiz_Factory {
 		$question_id = learn_press_get_request( 'question_id' );
 		$user        = learn_press_get_user( $user_id );
 		$quiz        = LP_Quiz::get_quiz( $quiz_id );
+		LP()->set_object( 'quiz', $quiz, true );
 
 		$question_answer = LP_Question_Factory::save_question_if_needed( $question_id, $quiz_id, $user_id );
 		if ( !$quiz || !$quiz->id ) {
@@ -130,10 +198,17 @@ class LP_Quiz_Factory {
 			$quiz->check_question( $question_id, $user );
 		}
 		if ( $question_id && $question = LP_Question_Factory::get_question( $question_id ) ) {
-			$checked = $question->get_answers( null, array( 'text' ) );
+			$include = apply_filters( 'learn_press_check_question_answers_include_fields', null, $question_id, $quiz_id, $user_id );
+			$exclude = apply_filters( 'learn_press_check_question_answers_exclude_fields', array( 'text' ), $question_id, $quiz_id, $user_id );
+			$checked = $question->get_answers( $include, $exclude );
+			if ( $checked ) {
+				$checked = array_values( $checked );
+			}
 		} else {
 			$checked = false;
 		}
+		$checked = apply_filters( 'learn_press_check_question_answers', $checked, $question_id, $quiz_id, $user_id );
+
 		$response = array(
 			'result'   => 'success',
 			'checked'  => $checked,

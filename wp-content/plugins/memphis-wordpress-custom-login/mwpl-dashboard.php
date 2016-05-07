@@ -1,11 +1,12 @@
 <?php
 $mwpl_bgimages = array();
 function mwpl_dashboard_init() {
-	if($_GET['page'] == 'memphis-custom-login.php') {
+	if(isset($_GET['page']) && $_GET['page'] == 'memphis-custom-login.php') {
 		//WORDPRESS IRIS COLOR PICKER
 		wp_enqueue_style( 'wp-color-picker' );
 		wp_enqueue_script( 'mwpl-color-picker', plugins_url('mwpl-admin-script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 	}
+	
 }
 function mwpl_dashboard_menu() {
 	add_menu_page( 'Memphis Custom Login', 'Memphis CL', 'administrator', 'memphis-wp-login.php', 'mwpl_blog_protection_dashboard', MWPL_PLUGIN_URL.'/assets/imgs/kon.ico'  );
@@ -91,6 +92,7 @@ function mwpl_register_settings() {
 	}
 	//************************************************************************************************* //
 	//*******************************   [   REMOVED VERSION 2.0   ]   ******************************* //
+	/*
 	//[REMOVE] add_option('mwpl_form_height',100);
 	//unregister_setting('mwpl-settings-group','mwpl_google_analytics');
 	delete_option('mwpl_form_height');
@@ -115,6 +117,7 @@ function mwpl_register_settings() {
 	//[REMOVE]register_setting('mwpl-settings-group2','mwpl_bl_offset_lr');
 	unregister_setting('mwpl-settings-group2','mwpl_bl_offset_lr');
 	delete_option('mwpl_bl_offset_lr');
+	*/
 	//************************************************************************************************* //
 	//************************************************************************************************* //
 
@@ -466,8 +469,6 @@ function mwpl_get_bgimages() {
 }
 
 function mwpl_get_bgimage_div($image) {
-	$imageurl = $image['imageurl'];
-	$imagepath = $image['imagepath'];
 	$imagename = $image['imagename'];
 	$upload_dir = wp_upload_dir();
 	//if(is_ssl() && !preg_match('/https/',$upload_dir['baseurl'])) $upload_dir['url'] = preg_replace('/http/','https',$upload_dir['url']);

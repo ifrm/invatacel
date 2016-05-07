@@ -498,7 +498,7 @@ if ( !function_exists( 'learn_press_output_user_profile_order' ) ) {
 	 */
 	function learn_press_output_user_profile_order( $user, $current, $tabs ) {
 
-		learn_press_get_template( 'profile/order.php', array( 'user' => $user, 'tabs' => $tabs, 'current' => $current ) );
+		//learn_press_get_template( 'profile/tabs/orders.php', array( 'user' => $user, 'tabs' => $tabs, 'current' => $current ) );
 	}
 }
 
@@ -523,6 +523,18 @@ if ( !function_exists( 'learn_press_profile_tab_courses_learning' ) ) {
 	function learn_press_profile_tab_courses_learning( $user ) {
 		$courses = $user->get( 'enrolled-courses', array( 'status' => 'enrolled', 'limit' => 10 ) );
 		learn_press_get_template( 'profile/tabs/courses/learning.php', array( 'user' => $user, 'courses' => $courses ) );
+	}
+}
+
+if ( !function_exists( 'learn_press_profile_tab_courses_purchased' ) ) {
+	/**
+	 * Display user profile tabs
+	 *
+	 * @param LP_User
+	 */
+	function learn_press_profile_tab_courses_purchased( $user ) {
+		$courses = $user->get( 'purchased-courses', array( 'limit' => 10 ) );
+		learn_press_get_template( 'profile/tabs/courses/purchased.php', array( 'user' => $user, 'courses' => $courses ) );
 	}
 }
 
@@ -572,7 +584,10 @@ if ( !function_exists( 'learn_press_user_profile_tabs' ) ) {
 	 *
 	 * @return mixed
 	 */
-	function learn_press_user_profile_tabs( $user ) {
+	function learn_press_user_profile_tabs( $user = null ) {
+		if ( !$user ) {
+			$user = get_user_by( 'id', get_current_user_id() );
+		}
 		$course_endpoint = LP()->settings->get( 'profile_endpoints.profile-courses' );
 		if ( !$course_endpoint ) {
 			$course_endpoint = 'profile-courses';
@@ -1140,7 +1155,7 @@ function learn_press_locate_template( $template_name, $template_path = '', $defa
 	}
 
 	if ( !$default_path ) {
-		$default_path = LP_PLUGIN_PATH . '/templates/';
+		$default_path = LP_PLUGIN_PATH . 'templates/';
 	}
 
 	// Look within passed path within the theme - this is priority

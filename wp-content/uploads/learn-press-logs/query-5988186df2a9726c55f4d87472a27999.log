@@ -1,141 +1,117 @@
------04-10-2016 @ 18:46:25 ------
+-----05-07-2016 @ 11:15:41 ------
 Array
 (
     [0] => Array
         (
-            [0] => SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN ('nav_menu') AND tt.term_id IN ('2') ORDER BY tr.object_id ASC
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (27,57,60,61) AND wp_posts.post_type = 'nav_menu_item' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.menu_order ASC 
             [1] => 2
         )
 
     [1] => Array
         (
-            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (27) AND wp_posts.post_type = 'nav_menu_item' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.menu_order ASC 
+            [0] => SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN ('nav_menu') AND tt.term_id IN ('2') ORDER BY tr.object_id ASC
             [1] => 2
         )
 
     [2] => Array
         (
-            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (19) AND wp_posts.post_type = 'page' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.post_date DESC 
+            [0] => SELECT t.*, tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = 2
             [1] => 1
         )
 
     [3] => Array
         (
-            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (27) ORDER BY meta_id ASC
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (57,27,60,61) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [4] => Array
         (
-            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (19) ORDER BY meta_id ASC
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (55,19,58) AND wp_posts.post_type = 'page' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.post_date DESC 
             [1] => 1
         )
 
     [5] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_timeout_learn_press_message' LIMIT 1
+            [0] =>  SELECT comment_approved, COUNT( * ) AS total FROM wp_comments GROUP BY comment_approved 
             [1] => 1
         )
 
     [6] => Array
         (
-            [0] => SELECT user_id, meta_key, meta_value FROM wp_usermeta WHERE user_id IN (2) ORDER BY umeta_id ASC
+            [0] => SELECT SQL_CALC_FOUND_ROWS wp_comments.comment_ID FROM wp_comments WHERE ( ( comment_approved = '1' ) OR ( user_id = 1 AND comment_approved = '0' ) ) AND comment_post_ID = 55 AND comment_parent = 0 ORDER BY wp_comments.comment_date_gmt ASC, wp_comments.comment_ID ASC 
             [1] => 1
         )
 
     [7] => Array
         (
-            [0] => SELECT * FROM wp_users WHERE ID = '2'
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (58,19) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [8] => Array
         (
-            [0] => SELECT autoload FROM wp_options WHERE option_name = '_transient_learn_press_message'
+            [0] => SELECT * FROM wp_posts WHERE (post_type = 'page' AND post_status = 'publish') AND post_parent = 55 ORDER BY wp_posts.post_title ASC LIMIT 0,1
             [1] => 1
         )
 
     [9] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_learn_press_message' LIMIT 1
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (55) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [10] => Array
         (
-            [0] => SELECT t.*, tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = 2
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (21) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [11] => Array
         (
-            [0] => SELECT t.*, tt.*, tr.object_id FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON tt.term_id = t.term_id INNER JOIN wp_term_relationships AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN ('course_category', 'course_tag') AND tr.object_id IN (21) ORDER BY t.name ASC
+            [0] => SELECT * FROM wp_posts WHERE ID = 19 LIMIT 1
             [1] => 1
         )
 
     [12] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_learn_press_install' LIMIT 1
+            [0] => SELECT user_id, meta_key, meta_value FROM wp_usermeta WHERE user_id IN (1) ORDER BY umeta_id ASC
             [1] => 1
         )
 
     [13] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_timeout_learn_press_install' LIMIT 1
+            [0] => SELECT * FROM wp_posts WHERE ID = 21 LIMIT 1
             [1] => 1
         )
 
     [14] => Array
         (
-            [0] => SELECT * FROM wp_posts WHERE ID = 21 LIMIT 1
+            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_timeout_learn_press_install' LIMIT 1
             [1] => 1
         )
 
     [15] => Array
         (
-            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (21) ORDER BY meta_id ASC
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID = 55 AND wp_posts.post_type = 'page' ORDER BY wp_posts.post_date DESC 
             [1] => 1
         )
 
     [16] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'theme_switched' LIMIT 1
+            [0] => SELECT * FROM wp_posts WHERE ID = 18 LIMIT 1
             [1] => 1
         )
 
     [17] => Array
         (
-            [0] => SELECT * FROM wp_posts WHERE ID = 18 LIMIT 1
+            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_learn_press_install' LIMIT 1
             [1] => 1
         )
 
     [18] => Array
         (
-            [0] => SELECT FOUND_ROWS()
-            [1] => 1
-        )
-
-    [19] => Array
-        (
-            [0] => SELECT SQL_CALC_FOUND_ROWS wp_posts.ID FROM wp_posts WHERE 1=1 AND wp_posts.post_type = 'lp_course' AND (wp_posts.post_status = 'publish') ORDER BY wp_posts.post_date DESC LIMIT 0, 10
-            [1] => 1
-        )
-
-    [20] => Array
-        (
-            [0] => SELECT * FROM wp_posts WHERE ID = 0
-            [1] => 1
-        )
-
-    [21] => Array
-        (
-            [0] => SELECT SQL_CALC_FOUND_ROWS wp_posts.ID FROM wp_posts INNER JOIN wp_postmeta ON ( wp_posts.ID = wp_postmeta.post_id ) WHERE 1=1 AND ( ( wp_postmeta.meta_key = '_lpr_is_profile_page' AND CAST(wp_postmeta.meta_value AS CHAR) = '1' ) ) AND wp_posts.post_type = 'page' AND ((wp_posts.post_status = 'publish')) GROUP BY wp_posts.ID ORDER BY wp_posts.post_date DESC LIMIT 0, 10
-            [1] => 1
-        )
-
-    [22] => Array
-        (
-            [0] => SELECT * FROM wp_posts WHERE ID = 19 LIMIT 1
+            [0] => SELECT * FROM wp_users WHERE user_login = 'admin'
             [1] => 1
         )
 

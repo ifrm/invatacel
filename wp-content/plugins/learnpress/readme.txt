@@ -4,7 +4,7 @@ Donate link:
 Tags: WordPress LMS, LMS, eLearning, e-Learning, Learning Management System, LMS WordPress, Course, Courses, Quiz, Quizzes, Training, Guru, Sell Courses  
 Requires at least: 3.8  
 Tested up to: 4.4
-Stable tag: trunk  
+Stable tag: trunk
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -172,6 +172,40 @@ https://www.transifex.com/projects/p/learnpress/
 4. LearnPress Courses Statistics.  
 
 == Changelog ==  
+
+== 1.0.3 ==
++ Added database tools for upgrade or remove data
++ Fixed allow search orders by customer information
++ Improved admin settings UI/UX
++ Fixed doesn't upgrade the lessons, quizzes, questions is not assigned yet
++ Fixed query for count students enrolled
++ Fixed instructor registration option
+
+== 1.0.2 ==
++ Fixed search results page template
+
+= 1.0.1 =
++ Improved LearnPress data migration.
++ Fixed LearnPress profile links.
++ Fixed LearnPress progress bar.
++ Fixed courses info duplication in profile.
+
+= 1.0 =
++ Enhanced performance and capacity to extends more features with new database structure
++ Enable purchase multiple courses with Cart
++ Checkout process
++ Option purchase FREE course without cart and checkout proccess
++ Option add course to cart using AJAX
++ Support static pages: Cart, Checkout, Profile, Archive Courses
++ Custom slug for pages with Wordpress Endpoint
++ Review order after do checkout
++ Emails system with capacity to overwtire as templates
++ New UI/UX for admin and frontend
++ Capacity to compatible with more themes
++ Custom permalink for course tag, archive courses, single course pages
++ Custom size of course thumbnail
++ Ability to add new order manually in admin
++ Improved add-ons page
 
 = 0.9.19 =
 - Removed some bad source codes.

@@ -291,6 +291,12 @@ function learn_press_add_rewrite_rules() {
 
 add_action( 'init', 'learn_press_add_rewrite_rules', 1000, 0 );
 
+function learn_press_flush_rewrite_rules() {
+
+}
+
+add_action( 'init', 'learn_press_flush_rewrite_rules', 999999999 );
+
 /**
  * This function parse query vars and put into request
  */
@@ -718,6 +724,7 @@ function learn_press_pre_get_items( $query ) {
 	global $post_type;
 	global $pagenow;
 	global $wpdb;
+
 	if ( current_user_can( LP()->teacher_role ) && is_admin() && $pagenow == 'edit.php' ) {
 		if ( in_array( $post_type, array( LP()->course_post_type, LP()->lesson_post_type, LP()->quiz_post_type, LP()->question_post_type ) ) ) {
 			$items = $wpdb->get_col(
@@ -742,6 +749,72 @@ function learn_press_pre_get_items( $query ) {
 	}
 }
 
+function _is_false_value( $value ) {
+	if ( is_numeric( $value ) ) {
+		return $value == 0;
+	} elseif ( is_string( $value ) ) {
+		return ( empty( $value ) || is_null( $value ) || in_array( $value, array( 'no', 'off', 'false' ) ) );
+	}
+	return !!$value;
+}
+
+/**
+ * This helper function is useful in case a meta is not exists in database
+ * but we need to set default value for it before get it value
+ *
+ * @param $check
+ * @param $object_id
+ * @param $meta_key
+ * @param $single
+ *
+ * @return string
+ */
+function learn_press_set_default_post_meta( $check, $object_id, $meta_key, $single ) {
+
+	switch ( $meta_key ) {
+		// quiz
+		case '_lp_show_result':
+		case '_lp_show_check_answer':
+		case '_lp_show_hint':
+			// course
+		case '_lp_payment':
+		case '_lp_required_enroll':
+		case '_lp_course_result':
+			// lesson
+		case '_lp_preview':
+			remove_filter( 'get_post_metadata', 'learn_press_set_default_post_meta', 999 );
+			if ( !get_post_meta( $object_id, $meta_key, $single ) ) {
+				$_check    = false;
+				$post_type = get_post_type( $object_id );
+				if ( $post_type == 'lp_quiz' && in_array( $meta_key, array( '_lp_show_result', '_lp_show_check_answer', '_lp_show_hint' ) ) ) {
+					if ( $meta_key == '_lp_show_hint' ) {
+						$_check = 'yes';
+					} else {
+						$_check = 'no';
+					}
+				} elseif ( $post_type == 'lp_course' && in_array( $meta_key, array( '_lp_payment', '_lp_required_enroll', '_lp_course_result' ) ) ) {
+					if ( $meta_key == '_lp_course_result' ) {
+						$_check = 'evaluate_lesson';
+					} else if ( $meta_key == '_lp_required_enroll' ) {
+						$_check = 'yes';
+					} else {
+						$_check = 'no';
+					}
+				} elseif ( $post_type == 'lp_lesson' ) {
+					$_check = 'no';
+				}
+				if ( $_check ) {
+					$check = $_check;
+					update_post_meta( $object_id, $meta_key, $check );
+					update_meta_cache( 'post', array( $object_id ) );
+				}
+			}
+			add_filter( 'get_post_metadata', 'learn_press_set_default_post_meta', 999, 4 );
+	}
+	return $check;
+}
+
+add_filter( 'get_post_metadata', 'learn_press_set_default_post_meta', 999, 4 );
 /**
  * @param $views
  *
@@ -879,14 +952,26 @@ if ( learn_press_has_profile_method() ) {
 	add_filter( 'learn_press_instructor_profile_link', 'learn_press_get_profile_link', 10, 3 );
 }
 function learn_press_get_profile_link( $link, $user_id, $course_id ) {
-	if ( is_null( $user_id ) ) {
-		$course  = get_post( $course_id );
-		$user_id = $course->post_author;
-	}
-	$user_login = get_the_author_meta( 'user_login', $user_id );
-	$link       = home_url( "/profile/$user_login" );
+	///_deprecated_function( __FUNCTION__, '1.0', 'learn_press_course_profile_link');
+	return learn_press_course_profile_link( $course_id );
+}
 
-	return $link;
+/**
+ * Return profile link of an user from a course
+ *
+ * @param int $course_id
+ *
+ * @return mixed|void
+ */
+function learn_press_course_profile_link( $course_id = 0 ) {
+	$link = null;
+	if ( !$course_id ) {
+		$course_id = get_the_ID();
+	}
+	if ( get_post( $course_id ) == 'lp_course' && $course_author = get_post_field( 'post_author', $course_id ) ) {
+		$link = learn_press_user_profile_link( $course_author );
+	}
+	return apply_filters( 'learn_press_course_profile_link', $link, $course_id, $course_author );
 }
 
 /*
@@ -1172,16 +1257,14 @@ function learn_press_template_loader( $template ) {
 			$find[] = $file;
 			$find[] = "{$theme_template}/{$file}";
 		} else {
-			if ( get_post_type() == LP()->course_post_type ) {
+			if ( learn_press_is_course() ) {
 				$file   = 'single-course.php';
 				$find[] = $file;
 				$find[] = "{$theme_template}/{$file}";
-			} else {
-				if ( get_post_type() == LP()->quiz_post_type ) {
-					$file   = 'single-quiz.php';
-					$find[] = $file;
-					$find[] = "{$theme_template}/{$file}";
-				}
+			} elseif ( learn_press_is_quiz() ) {
+				$file   = 'single-quiz.php';
+				$find[] = $file;
+				$find[] = "{$theme_template}/{$file}";
 			}
 		}
 	}
@@ -1432,7 +1515,8 @@ function learn_press_get_currency_symbol( $currency = '' ) {
 
 function learn_press_get_page_link( $key ) {
 	$page_id = LP()->settings->get( $key . '_page_id' );
-	return get_permalink( $page_id );
+	$link    = apply_filters( 'learn_press_get_page_link', get_permalink( $page_id ), $page_id, $key );
+	return apply_filters( 'learn_press_get_page_' . $key . '_link', $link, $page_id );
 }
 
 
@@ -1659,6 +1743,8 @@ function learn_press_posts_where_statement_search( $where ) {
 	// appdn ) to the end of the block
 	$where = preg_replace( '!(OR\s+' . $wpdb->terms . '.name LIKE \'%' . $wp_query->get( 's' ) . '%\')!', '$1 )', $where );
 
+	remove_filter( 'posts_where', 'learn_press_posts_where_statement_search', 99 );
+
 	return $where;
 }
 
@@ -1671,11 +1757,13 @@ function learn_press_posts_where_statement_search( $where ) {
 function learn_press_filter_search( $q ) {
 	if ( $q->is_main_query() && $q->is_search() && ( !empty( $_REQUEST['ref'] ) && $_REQUEST['ref'] == 'course' ) ) {
 		$q->set( 'post_type', LP()->course_post_type );
-		add_filter( 'posts_where', 'learn_press_posts_where_statement_search' );
+		add_filter( 'posts_where', 'learn_press_posts_where_statement_search', 99 );
+
+		remove_filter( 'pre_get_posts', 'learn_press_filter_search', 99 );
 	}
 }
 
-add_filter( 'pre_get_posts', 'learn_press_filter_search' );
+add_filter( 'pre_get_posts', 'learn_press_filter_search', 99 );
 
 /**
  * Convert an object|array to json format and send it to the browser
@@ -1853,14 +1941,10 @@ function learn_press_pre_get_posts( $q ) {
 add_action( 'pre_get_posts', 'learn_press_pre_get_posts' );
 
 function learn_press_init() {
-	if ( class_exists( 'LP_Settings' ) ) {
-		$settings = LP_Settings::instance( 'general' );
-		if ( $settings->get( 'instructor_registration' ) ) {
-			add_action( 'register_form', 'learn_press_edit_registration' );
-			add_action( 'user_register', 'learn_press_registration_save', 10, 1 );
-		}
+	if ( LP()->settings->get( 'instructor_registration' ) == 'yes' ) {
+		add_action( 'register_form', 'learn_press_edit_registration' );
+		add_action( 'user_register', 'learn_press_registration_save', 10, 1 );
 	}
-
 }
 
 add_action( 'init', 'learn_press_init' );
@@ -1880,7 +1964,13 @@ add_action( 'init', 'learn_press_init' );
 }*/
 
 function is_learnpress() {
-	return apply_filters( 'is_learnpress', ( learn_press_is_course_archive() || learn_press_is_course_taxonomy() || learn_press_is_course() || learn_press_is_quiz() ) ? true : false );
+	return apply_filters( 'is_learnpress', ( learn_press_is_course_archive() || learn_press_is_course_taxonomy() || learn_press_is_course() || learn_press_is_quiz() || learn_press_is_search() ) ? true : false );
+}
+
+if ( !function_exists( 'learn_press_is_search' ) ) {
+	function learn_press_is_search() {
+		return array_key_exists( 's', $_REQUEST ) && array_key_exists( 'ref', $_REQUEST ) && $_REQUEST['ref'] == 'course';
+	}
 }
 
 if ( !function_exists( 'learn_press_is_courses' ) ) {
@@ -2197,15 +2287,94 @@ function learn_press_get_current_version() {
 	return $data['Version'];
 }
 
+function learn_press_sanitize_json( $string ) {
+
+	echo json_encode( $string );
+	return $string;
+}
+
+function learn_press_get_current_profile_tab() {
+	global $wp_query;
+	$current = '';
+	if ( !empty( $_REQUEST['tab'] ) ) {
+		$current = $_REQUEST['tab'];
+	} else if ( !empty( $wp_query->query_vars['tab'] ) ) {
+		$current = $wp_query->query_vars['tab'];
+	} else {
+		if ( $tabs = learn_press_user_profile_tabs() ) {
+			$tab_keys = array_keys( $tabs );
+			$current  = reset( $tab_keys );
+		}
+	}
+	return $current;
+}
+
+function learn_press_user_profile_link( $user_id = 0, $tab = null ) {
+	if ( !$user_id ) {
+		$user = get_user_by( 'id', get_current_user_id() );
+	} else {
+		$user = get_user_by( 'id', $user_id );
+	}
+
+	if ( !$user ) {
+		return '';
+	}
+	global $wp_query;
+	$page_id = !empty( $wp_query->queried_object_id ) ? $wp_query->queried_object_id : ( !empty( $wp_query->query_vars['page_id'] ) ? $wp_query->query_vars['page_id'] : - 1 );
+	$args    = array(
+		'user' => $user->user_login
+	);
+	if ( $tab ) {
+		$args['tab'] = $tab;
+	}
+	$args = array_map( '_learn_press_urlencode', $args );
+	if ( get_option( 'permalink_structure' ) && learn_press_get_page_id( 'profile' ) ) {
+		$url = learn_press_get_page_link( 'profile' ) . join( "/", array_values( $args ) );
+	} else {
+		$url = add_query_arg( $args, learn_press_get_page_link( 'profile' ) );
+	}
+	return $url;
+}
+
+function _learn_press_urlencode( $string ) {
+	return preg_replace( '/\s/', '+', $string );
+}
+
+/**
+ * @param $template
+ *
+ * @return string
+ */
+function learn_press_search_template( $template ) {
+	if ( !empty( $_REQUEST['ref'] ) && ( $_REQUEST['ref'] == 'course' ) ) {
+		$template = learn_press_locate_template( 'archive-course.php' );
+	}
+	return $template;
+}
+
+add_filter( 'template_include', 'learn_press_search_template', 69 );
+
+function learn_press_redirect_search() {
+	if ( learn_press_is_search() ) {
+		$search_page = learn_press_get_page_id( 'search' );
+		if ( !is_page( $search_page ) ) {
+			global $wp_query;
+			wp_redirect( add_query_arg( 's', $wp_query->query_vars['s'], get_the_permalink( $search_page ) ) );
+			exit();
+		}
+	}
+}
+
+//add_action( 'init', 'learn_press_redirect_search' );
+
 include_once "debug.php";
-include_once "lp-add-ons.php";
 
 function learn_press_debug() {
 	$args = func_get_args();
 	$arg  = true;
 	echo '<pre>';
 	if ( $args ) foreach ( $args as $arg ) {
-		print_r( $args );
+		print_r( $arg );
 	}
 	echo '</pre>';
 	if ( $arg === true ) {

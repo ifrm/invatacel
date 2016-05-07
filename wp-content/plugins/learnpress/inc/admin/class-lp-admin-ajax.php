@@ -556,7 +556,7 @@ if ( !class_exists( 'LP_Admin_Ajax' ) ) {
 		static function toggle_lesson_preview() {
 			$id = learn_press_get_request( 'lesson_id' );
 			if ( get_post_type( $id ) == 'lp_lesson' && wp_verify_nonce( learn_press_get_request( 'nonce' ), 'learn-press-toggle-lesson-preview' ) ) {
-				update_post_meta( $id, '_lp_is_previewable', learn_press_get_request( 'previewable' ) );
+				update_post_meta( $id, '_lp_preview', learn_press_get_request( 'previewable' ) );
 			}
 			die();
 		}
@@ -658,6 +658,7 @@ if ( !class_exists( 'LP_Admin_Ajax' ) ) {
 		}
 
 		public static function add_quiz_question() {
+			global $post;
 			$id       = learn_press_get_request( 'id' );
 			$quiz_id  = learn_press_get_request( 'quiz_id' );
 			$type     = learn_press_get_request( 'type' );
@@ -665,6 +666,8 @@ if ( !class_exists( 'LP_Admin_Ajax' ) ) {
 			$response = array(
 				'id' => $id
 			);
+			$post     = get_post( $quiz_id );
+			setup_postdata( $post );
 			if ( !$id ) {
 				$id = wp_insert_post(
 					array(

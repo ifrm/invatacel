@@ -15,8 +15,7 @@ if ( !class_exists( 'LP_Lesson_Post_Type' ) ) {
 			$post_type_name = 'lp_lesson';
 			add_filter( 'manage_' . $post_type_name . '_posts_columns', array( $this, 'columns_head' ) );
 			add_action( 'manage_' . $post_type_name . '_posts_custom_column', array( $this, 'columns_content' ), 10, 2 );
-			add_action( 'save_post_' . $post_type_name, array( $this, 'update_lesson_meta' ) );
-
+			
 			// filter
 			add_filter( 'posts_fields', array( $this, 'posts_fields' ) );
 			add_filter( 'posts_join_paged', array( $this, 'posts_join_paged' ) );
@@ -42,13 +41,7 @@ if ( !class_exists( 'LP_Lesson_Post_Type' ) ) {
 
 		static function admin_scripts(){
 			if ( in_array( get_post_type(), array( LP()->course_post_type, LP()->lesson_post_type ) ) ) {
-
-				//wp_enqueue_style( 'lp-meta-boxes', LP()->plugin_url( 'assets/css/meta-boxes.css' ) );
 				wp_enqueue_script( 'jquery-caret', LP()->plugin_url( 'assets/js/jquery.caret.js', 'jquery' ) );
-				//wp_enqueue_script( 'lp-meta-boxes', LP()->plugin_url( 'assets/js/meta-boxes.js', 'jquery', 'backbone', 'util' ) );
-
-				//wp_localize_script( 'lp-meta-boxes', 'lp_lesson_params', self::admin_params() );
-
 			}
 		}
 
@@ -139,7 +132,7 @@ if ( !class_exists( 'LP_Lesson_Post_Type' ) ) {
 					),
 					array(
 						'name'    => __( 'Preview Lesson', 'learnpress' ),
-						'id'      => "{$prefix}is_previewable",
+						'id'      => "{$prefix}preview",
 						'type'    => 'radio',
 						'desc'    => __( 'If this is a preview lesson, then student can view this lesson content without taking the course', 'learnpress' ),
 						'options' => array(
@@ -201,7 +194,7 @@ if ( !class_exists( 'LP_Lesson_Post_Type' ) ) {
 			if( current_theme_supports( 'post-formats' ) ){
 				$new_columns['format'] = __( 'Format', 'learnpress' );
 			}
-			$new_columns['is_previewable'] = __( 'Preview', 'learnpress' );
+			$new_columns['preview'] = __( 'Preview', 'learnpress' );
 			if ( false !== $pos && !array_key_exists( LP()->course_post_type, $columns ) ) {
 				$columns = array_merge(
 					array_slice( $columns, 0, $pos + 1 ),
@@ -252,30 +245,16 @@ if ( !class_exists( 'LP_Lesson_Post_Type' ) ) {
 
 
 					break;
-				case 'is_previewable':
+				case 'preview':
 					printf(
 						'<input type="checkbox" class="learn-press-checkbox learn-press-toggle-lesson-preview" %s value="%s" data-nonce="%s" />',
-						get_post_meta( $post_id, '_lp_is_previewable', true ) == 'yes' ? ' checked="checked"' : '',
+						get_post_meta( $post_id, '_lp_preview', true ) == 'yes' ? ' checked="checked"' : '',
 						$post_id,
 						wp_create_nonce( 'learn-press-toggle-lesson-preview' )
 					);
 					break;
 				case 'format':
 					learn_press_item_meta_format( $post_id, __( 'Standard', 'learnpress' ) );
-			}
-		}
-
-		/**
-		 * Update lesson meta data
-		 *
-		 * @param $lesson_id
-		 */
-		function update_lesson_meta( $lesson_id ) {
-			return;
-			$course_id = get_post_meta( $lesson_id, '_lpr_course', true );
-			if ( !$course_id ) {
-				delete_post_meta( $lesson_id, '_lpr_course' );
-				update_post_meta( $lesson_id, '_lpr_course', 0 );
 			}
 		}
 
@@ -380,7 +359,7 @@ if ( !class_exists( 'LP_Lesson_Post_Type' ) ) {
 			$meta = apply_filters( 'learn_press_default_lesson_meta',
 				array(
 					'_lp_duration'		=> 10,
-					'_lp_is_previewable' => 'no'
+					'_lp_preview' => 'no'
 				)
 			);
 			foreach( $meta as $key => $value ){

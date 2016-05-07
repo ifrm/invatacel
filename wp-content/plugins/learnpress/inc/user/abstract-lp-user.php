@@ -140,7 +140,7 @@ class LP_Abstract_User {
 
 			$user_quiz_id = $wpdb->insert_id;
 
-			$quiz              = LP_Quiz::get_quiz( $quiz_id );
+			$quiz              = new LP_Quiz( $quiz_id );
 			$quiz_questions    = $quiz->get_questions();
 			$quiz_question_ids = $quiz_questions ? array_keys( $quiz_questions ) : array();
 			$quiz_question_ids = array_filter( $quiz_question_ids );
@@ -155,7 +155,8 @@ class LP_Abstract_User {
 					'current_question' => !empty( $quiz_question_ids[0] ) ? $quiz_question_ids[0] : null,
 					'question_answers' => '',
 					'questions'        => $quiz_question_ids
-				)
+				),
+				$quiz_id, $this->id
 			);
 
 			foreach ( $user_quiz_data as $key => $value ) {
@@ -917,36 +918,71 @@ class LP_Abstract_User {
 		return $quizzes[$quiz_id];
 	}
 
+	function is_exists_lesson( $lesson_id, $course_id ) {
+		global $wpdb;
+		$query = $wpdb->prepare( "
+			SELECT user_lesson_id
+			FROM {$wpdb->prefix}learnpress_user_lessons
+			WHERE user_id = %d
+			AND course_id = %d
+			AND lesson_id = %d
+		", $this->id, $course_id, $lesson_id );
+		return $wpdb->get_var( $query );
+	}
+
 	function complete_lesson( $lesson_id, $course_id = 0 ) {
 		global $wpdb;
 		do_action( 'learn_press_before_user_complete_lesson', $lesson_id, $this );
-		$updated = $wpdb->update(
-			$wpdb->prefix . 'learnpress_user_lessons',
-			array(
-				'end_time' => current_time( 'mysql' ),
-				'status'   => 'completed'
-			),
-			array(
-				'user_id'   => $this->id,
-				'lesson_id' => $lesson_id,
-			),
-			array( '%s', '%s' ),
-			array( '%d', '%d' )
-		);
-		$result  = false;
+		if ( !$course_id ) {
+			$course_id = LP_Course::get_course_by_item( $lesson_id );
+		}
+		if ( $this->is_exists_lesson( $lesson_id, $course_id ) ) {
+			$updated = $wpdb->update(
+				$wpdb->prefix . 'learnpress_user_lessons',
+				array(
+					'end_time' => current_time( 'mysql' ),
+					'status'   => 'completed'
+				),
+				array(
+					'user_id'   => $this->id,
+					'lesson_id' => $lesson_id,
+					'course_id' => $course_id
+				),
+				array( '%s', '%s' ),
+				array( '%d', '%d', '%d' )
+			);
+		} else {
+			$updated = $wpdb->insert(
+				$wpdb->prefix . 'learnpress_user_lessons',
+				array(
+					'user_id'    => $this->id,
+					'lesson_id'  => $lesson_id,
+					'course_id'  => $course_id,
+					'start_time' => current_time( 'mysql' ),
+					'end_time'   => current_time( 'mysql' ),
+					'status'     => 'completed'
+				),
+				array( '%d', '%d', '%d', '%s', '%s', '%s' )
+			);
+		}
+		$result = false;
 		if ( $updated ) {
-			if ( !$course_id ) {
-				$course_id = LP_Course::get_course_by_item( $lesson_id );
-			}
 			if ( $course = LP_Course::get_course( $course_id ) ) {
 				$result = $course->evaluate_course_results( $this->id );
 			}
+		} else {
+			$result = new WP_Error( null, $wpdb->last_error );
 		}
+
 		do_action( 'learn_press_user_complete_lesson', $lesson_id, $result, $this->id );
 		return $result;
 	}
 
-	function has_completed_lesson( $lesson_id ) {
+	function has_completed_lesson( $lesson_id, $course_id = null ) {
+		if ( !$course_id ) {
+			$course    = LP()->course;
+			$course_id = $course ? $course->id : 0;
+		}
 		$lessons = !empty( self::$_lessons[$this->id] ) ? self::$_lessons[$this->id] : array();
 		if ( empty( $lessons ) || ( $lessons && !array_key_exists( $lesson_id, $lessons ) ) ) {
 			global $wpdb;
@@ -954,6 +990,7 @@ class LP_Abstract_User {
 				SELECT lesson_id, status FROM {$wpdb->prefix}learnpress_user_lessons
 				WHERE user_id = %d
 			", $this->id );
+			$query .= $course_id ? $wpdb->prepare( " AND course_id = %d", $course_id ) : '';
 			if ( $rows = $wpdb->get_results( $query ) ) {
 				foreach ( $rows as $r ) {
 					$lessons[$r->lesson_id] = $r->status;
@@ -1053,9 +1090,9 @@ class LP_Abstract_User {
 			$questions = array_keys( $questions );
 		}
 		if ( !empty( $questions ) ) {
-			$question_answers = $progress->question_answers;
+			$question_answers = !empty( $progress->question_answers ) ? $progress->question_answers : array();
 			foreach ( $questions as $question_id ) {
-				if ( is_array( $question_answers ) && !is_null( $question_answers[$question_id] ) ) {
+				if ( is_array( $question_answers ) && array_key_exists( $question_id, $question_answers ) && !is_null( $question_answers[$question_id] ) ) {
 					$question = LP_Question_Factory::get_question( $question_id );
 					$check    = $question->check( $question_answers[$question_id] );
 
@@ -1193,7 +1230,7 @@ class LP_Abstract_User {
 	 */
 	private function _parse_item_order_of_course( $course_id ) {
 		static $courses_parsed = array();
-		if ( !empty( $courses_parsed[$course_id] ) ) {
+		if ( !empty( $courses_parsed[$this->id . '-' . $course_id] ) ) {
 			return true;
 		}
 		global $wpdb;
@@ -1222,7 +1259,7 @@ class LP_Abstract_User {
 				}
 			}
 		}
-		$courses_parsed[$course_id] = true;
+		$courses_parsed[$this->id . '-' . $course_id] = true;
 	}
 
 	/**
@@ -1298,7 +1335,8 @@ class LP_Abstract_User {
 				'limit'   => - 1,
 				'paged'   => 1,
 				'orderby' => 'post_title',
-				'order'   => 'ASC'
+				'order'   => 'ASC',
+				'user_id' => $this->id
 			)
 		);
 		ksort( $args );
@@ -1328,10 +1366,10 @@ class LP_Abstract_User {
 					WHERE uc.user_id = %d
 						AND c.post_type = %s
 						AND c.post_status = %s
-				) a
+				) a GROUP BY a.ID
 			",
 				LP()->course_post_type, $this->id,
-				$this->id, LP()->course_post_type, 'publish'
+				$args['user_id'], LP()->course_post_type, 'publish'
 			);
 			$query .= $where . $order . $limit;
 			$courses[$key] = $wpdb->get_results( $query );
@@ -1348,8 +1386,9 @@ class LP_Abstract_User {
 			INNER JOIN {$wpdb->users} u ON u.ID = om.meta_value
 			WHERE o.post_type = %s
 			AND u.ID = %d
+			AND o.post_status <> %s
 			ORDER BY `post_date` DESC
-		", '_user_id', 'lp_order', $this->id );
+		", '_user_id', 'lp_order', $this->id, 'trash' );
 		$orders = $wpdb->get_results( $query );
 		return apply_filters( 'learn_press_user_orders', $orders, $this->id );
 	}
@@ -1390,7 +1429,7 @@ class LP_Abstract_User {
 		}
 
 		$results  = $this->get_quiz_results( $quiz_id );
-		$answered = $results->question_answers;
+		$answered = !empty( $results->question_answers ) ? $results->question_answers : array();
 		return $answered ? array_key_exists( $question_id, $answered ) : false;
 	}
 
@@ -1400,9 +1439,10 @@ class LP_Abstract_User {
 		$args = wp_parse_args(
 			$args,
 			array(
-				'status' => '',
-				'limit'  => - 1,
-				'paged'  => 1
+				'status'  => '',
+				'limit'   => - 1,
+				'paged'   => 1,
+				'user_id' => $this->id
 			)
 		);
 		ksort( $args );
@@ -1425,11 +1465,66 @@ class LP_Abstract_User {
 				WHERE uc.user_id = %d
 					AND c.post_type = %s
 					AND c.post_status = %s
-			", $this->id, 'lp_course', 'publish' );
+			", $args['user_id'], 'lp_course', 'publish' );
 			$query .= $where . $limit;
 
 			$courses[$key] = $wpdb->get_results( $query );
 		}
+		return $courses[$key];
+	}
+
+	function get_purchased_courses( $args = array() ) {
+		global $wpdb;
+		static $courses = array();
+		$args = wp_parse_args(
+			$args,
+			array(
+				'status' => '',
+				'limit'  => - 1,
+				'paged'  => 1
+			)
+		);
+		ksort( $args );
+		$key = md5( serialize( $args ) );
+		if ( empty( $courses[$key] ) ) {
+
+//			$where = $args['status'] ? $wpdb->prepare( "AND uc.status = %s", $args['status'] ) : '';
+			$limit = "\n";
+			if ( $args['limit'] > 0 ) {
+				if ( !$args['paged'] ) {
+					$args['paged'] = 1;
+				}
+				$start = ( $args['paged'] - 1 ) * $args['limit'];
+				$limit .= "LIMIT " . $start . ',' . $args['limit'];
+			}
+			$query = $wpdb->prepare( "
+				SELECT * FROM {$wpdb->posts} WHERE ID IN (
+					 SELECT oim.meta_value AS ID
+						FROM `{$wpdb->posts}` AS p
+						INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id AND pm.meta_key = %s AND pm.meta_value = %d
+						INNER JOIN {$wpdb->learnpress_order_items} AS oi ON p.ID = oi.order_id
+						INNER JOIN {$wpdb->learnpress_order_itemmeta} AS oim ON oi.order_item_id = oim.learnpress_order_item_id AND oim.meta_key = %s
+						WHERE p.post_status = %s
+						AND oim.meta_value NOT IN (SELECT uc.course_id FROM {$wpdb->learnpress_user_courses} AS uc WHERE uc.user_id = %d )
+						GROUP BY oim.meta_value
+				 )
+			", '_user_id', $this->id, '_course_id', 'lp-completed', $this->id );
+			/*
+			 SELECT c.*
+			FROM wp_posts o
+			INNER JOIN wp_learnpress_order_items oi ON oi.order_id = o.ID
+			INNER JOIN wp_learnpress_order_itemmeta oim ON oim.learnpress_order_item_id = oi.order_item_id AND oim.meta_key = '_course_id'
+			INNER JOIN wp_posts c ON c.ID = oim.meta_value
+			INNER JOIN wp_postmeta om ON om.post_id = o.ID AND om.meta_key = '_user_id'
+			WHERE o.post_status = 'lp-completed'
+			AND c.post_type = 'lp_course'
+			AND om.meta_value=1
+			 */
+			$query .= $limit;
+
+			$courses[$key] = $wpdb->get_results( $query );
+		}
+
 		return $courses[$key];
 	}
 

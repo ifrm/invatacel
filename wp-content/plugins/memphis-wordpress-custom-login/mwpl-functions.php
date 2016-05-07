@@ -25,10 +25,12 @@ function mwpl_update_registry($input) {
 	$registry = get_option('mwpl_google_analytics');
 	if($registry != '') {
 	foreach ($mwpl_google_analytics  as $option => $option_value) {
-		if($input[$option]) {
-			//echo "value: " .$input[$option]."<br/>";
-			$registry[$option] = $input[$option]; }
-		else $registry[$option] = $mwpl_google_analytics[$option];
+		if(isset($input[$option])) {
+			if($input[$option]) {
+				//echo "value: " .$input[$option]."<br/>";
+				$registry[$option] = $input[$option]; }
+			else $registry[$option] = $mwpl_google_analytics[$option];
+		} else $registry[$option] = false;
 	}
 	//print_r($input);
 	return $registry;

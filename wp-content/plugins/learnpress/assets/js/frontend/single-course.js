@@ -31,7 +31,6 @@ if (typeof LearnPress == 'undefined') {
 			_.bindAll(this, '_finishCourse', '_sanitizeProgress', 'completeLesson');
 			this.$doc = $(document);
 			this.$body = $(document.body);
-
 			LearnPress.Hook.addFilter('learn_press_before_load_item', function ($view) {
 				LearnPress.MessageBox.blockUI();
 				if ($view.model.get('type') == 'lp_quiz') {
@@ -57,14 +56,14 @@ if (typeof LearnPress == 'undefined') {
 			LearnPress.toElement('#learn-press-course-lesson-heading');
 			LearnPress.MessageBox.hide();
 		},
-		completeLesson   : function (response) {
+		completeLesson   : function (response, that) {
 			if (response && response.result == 'success') {
 				var $button = this.$('.complete-lesson-button').addClass('completed').prop('disabled', true).html(response.button_text);
 				$('.course-item-' + response.id).addClass('item-completed');
 				if (response.course_result) {
 					if (response.can_finish) {
 						this.$('#learn-press-finish-course').removeClass('hide-if-js');
-						LearnPress.Hook.doAction('learn_press_user_passed_course_condition', response, this);
+						LearnPress.Hook.doAction('learn_press_user_passed_course_condition', response, this, that);
 					}
 					if (response.message) {
 						$(response.message).insertBefore($button);
@@ -85,7 +84,6 @@ if (typeof LearnPress == 'undefined') {
 		},
 		loadLesson       : function (permalink, args) {
 			var that = this;
-			console.log('loadLesson')
 			LearnPress.Hook.doAction('learn_press_before_load_lesson', permalink, this);
 			args = $.extend({
 				success: function () {

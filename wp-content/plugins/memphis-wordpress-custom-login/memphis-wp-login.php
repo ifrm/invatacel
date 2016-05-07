@@ -4,9 +4,9 @@ Plugin Name: Memphis Custom Login
 Plugin URI: http://www.kingofnothing.net
 Description: A simple way to control your WordPress Login Page, features include Password Protected Blog, Custom Redirect after login, Changing the look of the Login Screen.
 Author: Ian Howatson
-Version: 3.2.2
+Version: 3.2.3
 Author URI: http://www.kingofnothing.net/
-Date: 03/29/2016
+Date: 05/03/2016
 
 Copyright 2016 Ian Howatson  (email : ian@howatson.net)
 
@@ -45,8 +45,8 @@ function mwpl_change_login_redirect() {
 		case 'dashboard':
 			break;
 		case 'home':
-			if(!FORCE_SSL_LOGIN || FORCE_SSL_LOGIN == null) $site_url = preg_replace('/https/','http',MWPL_HOME_PAGE);
-			else $site_url = MWPL_HOME_PAGE;
+			//if(!FORCE_SSL_LOGIN || FORCE_SSL_LOGIN == null) $site_url = preg_replace('/https/','http',MWPL_HOME_PAGE);
+			//else $site_url = MWPL_HOME_PAGE;
 			if ($redirect_to == $site_url.'/wp-admin/') { $redirect_to = $site_url; }
 			break;
 		case 'profile':
@@ -56,8 +56,8 @@ function mwpl_change_login_redirect() {
 			//if ($redirect_to == $site_url.'/wp-admin/') { $redirect_to = bp_loggedin_user_domain($user->ID); }
 			//break;
 		case 'custom':
-			if(!FORCE_SSL_LOGIN && !preg_match('/wp-admin/',$custom_page)) $site_url = preg_replace('/https/','http',$site_url);
-			if(!FORCE_SSL_ADMIN) $site_url = preg_replace('/https/','http',$site_url);
+			//if(!FORCE_SSL_LOGIN && !preg_match('/wp-admin/',$custom_page)) $site_url = preg_replace('/https/','http',$site_url);
+			//if(!FORCE_SSL_ADMIN) $site_url = preg_replace('/https/','http',$site_url);
 			if ($custom_page != '') { $redirect_to = ($site_url.'/'.$custom_page); }
 			break;
 		default:
