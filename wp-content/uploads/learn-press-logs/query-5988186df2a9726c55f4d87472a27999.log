@@ -1,33 +1,33 @@
------05-22-2016 @ 21:24:45 ------
+-----05-23-2016 @ 17:25:48 ------
 Array
 (
     [0] => Array
-        (
-            [0] => SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN ('nav_menu') AND tt.term_id IN ('2') ORDER BY tr.object_id ASC
-            [1] => 2
-        )
-
-    [1] => Array
         (
             [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (27,57,60,61) AND wp_posts.post_type = 'nav_menu_item' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.menu_order ASC 
             [1] => 2
         )
 
+    [1] => Array
+        (
+            [0] => SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN ('nav_menu') AND tt.term_id IN ('2') ORDER BY tr.object_id ASC
+            [1] => 2
+        )
+
     [2] => Array
         (
-            [0] => SELECT t.*, tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = 2
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (55,19,58) AND wp_posts.post_type = 'page' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.post_date DESC 
             [1] => 1
         )
 
     [3] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_academica-8c0de1e0b1d3c7eb25baa23663e69431' LIMIT 1
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (55,19) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [4] => Array
         (
-            [0] => SELECT * FROM wp_posts WHERE (post_type = 'page' AND post_status = 'publish') AND post_parent = 55 ORDER BY wp_posts.post_title ASC LIMIT 0,1
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (57,27,60,61) ORDER BY meta_id ASC
             [1] => 1
         )
 
@@ -39,143 +39,179 @@ Array
 
     [6] => Array
         (
-            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (57,27,60,61) ORDER BY meta_id ASC
+            [0] => SELECT t.*, tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = 2
             [1] => 1
         )
 
     [7] => Array
         (
-            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (55,19,58) AND wp_posts.post_type = 'page' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.post_date DESC 
+            [0] => SELECT SQL_CALC_FOUND_ROWS wp_comments.comment_ID FROM wp_comments WHERE ( ( comment_approved = '1' ) OR ( user_id = 1 AND comment_approved = '0' ) ) AND comment_post_ID = 58 AND comment_parent = 0 ORDER BY wp_comments.comment_date_gmt ASC, wp_comments.comment_ID ASC 
             [1] => 1
         )
 
     [8] => Array
         (
-            [0] => SELECT SQL_CALC_FOUND_ROWS wp_comments.comment_ID FROM wp_comments WHERE ( ( comment_approved = '1' ) OR ( user_id = 1 AND comment_approved = '0' ) ) AND comment_post_ID = 55 AND comment_parent = 0 ORDER BY wp_comments.comment_date_gmt ASC, wp_comments.comment_ID ASC 
+            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_academica-8c0de1e0b1d3c7eb25baa23663e69431' LIMIT 1
             [1] => 1
         )
 
     [9] => Array
         (
-            [0] =>  SELECT comment_approved, COUNT( * ) AS total FROM wp_comments GROUP BY comment_approved 
+            [0] => SELECT wp_posts.ID FROM wp_posts WHERE 1=1 AND wp_posts.post_type = 'post' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.post_date DESC LIMIT 0, 8
             [1] => 1
         )
 
     [10] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_width' LIMIT 1
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (63,51,39) AND wp_posts.post_type = 'lp_course' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.post_date DESC 
             [1] => 1
         )
 
     [11] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_height' LIMIT 1
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (63,51,39) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [12] => Array
         (
-            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (58,19) ORDER BY meta_id ASC
+            [0] =>  SELECT comment_approved, COUNT( * ) AS total FROM wp_comments GROUP BY comment_approved 
             [1] => 1
         )
 
     [13] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_title' LIMIT 1
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (254,255,256) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [14] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_stylesheet' LIMIT 1
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID IN (254,255,256) AND wp_posts.post_type = 'nav_menu_item' AND ((wp_posts.post_status = 'publish')) ORDER BY wp_posts.menu_order ASC 
             [1] => 1
         )
 
     [15] => Array
         (
-            [0] => SELECT * FROM wp_QuoteRotator ORDER BY id
+            [0] => SELECT t.*, tt.* FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = 6
             [1] => 1
         )
 
     [16] => Array
         (
-            [0] => SELECT * FROM wp_posts WHERE ID = 18 LIMIT 1
+            [0] => SELECT tr.object_id FROM wp_term_relationships AS tr INNER JOIN wp_term_taxonomy AS tt ON tr.term_taxonomy_id = tt.term_taxonomy_id WHERE tt.taxonomy IN ('nav_menu') AND tt.term_id IN ('6') ORDER BY tr.object_id ASC
             [1] => 1
         )
 
     [17] => Array
         (
-            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND wp_posts.ID = 55 AND wp_posts.post_type = 'page' ORDER BY wp_posts.post_date DESC 
+            [0] => SELECT * FROM wp_posts WHERE (post_type = 'page' AND post_status = 'publish') AND post_parent = 58 ORDER BY wp_posts.post_title ASC LIMIT 0,1
             [1] => 1
         )
 
     [18] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_learn_press_install' LIMIT 1
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_stylesheet' LIMIT 1
             [1] => 1
         )
 
     [19] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_timeout_learn_press_install' LIMIT 1
+            [0] => SELECT * FROM wp_posts WHERE ID = 18 LIMIT 1
             [1] => 1
         )
 
     [20] => Array
         (
-            [0] => SELECT user_id, meta_key, meta_value FROM wp_usermeta WHERE user_id IN (1) ORDER BY umeta_id ASC
+            [0] =>  SELECT ID, post_name, post_parent, post_type FROM wp_posts WHERE post_name IN ('contact') AND post_type IN ('page','attachment') 
             [1] => 1
         )
 
     [21] => Array
         (
-            [0] => SELECT * FROM wp_posts WHERE ID = 19 LIMIT 1
+            [0] => SELECT * FROM wp_posts WHERE ID = 58 LIMIT 1
             [1] => 1
         )
 
     [22] => Array
         (
-            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (55) ORDER BY meta_id ASC
+            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_learn_press_install' LIMIT 1
             [1] => 1
         )
 
     [23] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_delay' LIMIT 1
+            [0] => SELECT option_value FROM wp_options WHERE option_name = '_transient_timeout_learn_press_install' LIMIT 1
             [1] => 1
         )
 
     [24] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_openquote' LIMIT 1
+            [0] => SELECT user_id, meta_key, meta_value FROM wp_usermeta WHERE user_id IN (1) ORDER BY umeta_id ASC
             [1] => 1
         )
 
     [25] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_closequote' LIMIT 1
+            [0] => SELECT * FROM wp_posts WHERE ID = 19 LIMIT 1
             [1] => 1
         )
 
     [26] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_random' LIMIT 1
+            [0] => SELECT wp_posts.* FROM wp_posts WHERE 1=1 AND (wp_posts.ID = '58') AND wp_posts.post_type = 'page' ORDER BY wp_posts.post_date DESC 
             [1] => 1
         )
 
     [27] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_fadeout' LIMIT 1
+            [0] => SELECT post_id, meta_key, meta_value FROM wp_postmeta WHERE post_id IN (58) ORDER BY meta_id ASC
             [1] => 1
         )
 
     [28] => Array
         (
-            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_fade' LIMIT 1
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_openquote' LIMIT 1
             [1] => 1
         )
 
     [29] => Array
+        (
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_closequote' LIMIT 1
+            [1] => 1
+        )
+
+    [30] => Array
+        (
+            [0] => SELECT * FROM wp_QuoteRotator ORDER BY id
+            [1] => 1
+        )
+
+    [31] => Array
+        (
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_random' LIMIT 1
+            [1] => 1
+        )
+
+    [32] => Array
+        (
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_fadeout' LIMIT 1
+            [1] => 1
+        )
+
+    [33] => Array
+        (
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_delay' LIMIT 1
+            [1] => 1
+        )
+
+    [34] => Array
+        (
+            [0] => SELECT option_value FROM wp_options WHERE option_name = 'fqr_fade' LIMIT 1
+            [1] => 1
+        )
+
+    [35] => Array
         (
             [0] => SELECT * FROM wp_users WHERE user_login = 'admin'
             [1] => 1

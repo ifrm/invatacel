@@ -11,5 +11,12 @@ License: GPL v2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 #search button {
-	text-indent:-400000px
+	text-indent:-400000px;
+}
+
+#quote {
+	font-size:300%;
+}
+#quoteauthor {
+	font-size:200%;
 }
