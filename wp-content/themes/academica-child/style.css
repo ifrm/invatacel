@@ -1,0 +1,15 @@
+/*
+Theme Name: Academica child
+Theme URI: http://www.wpzoom.com/themes/academica/
+Description: Academica is an education- and school-oriented CMS theme with a three-column layout and modern design. It is easy to customize and comes with a custom widget, three templates for Posts and Pages.
+Tags: blue, two-columns, three-columns, custom-header, custom-menu, translation-ready
+Template: academica
+Version: 2.0
+Author: WPZOOM
+Author URI: http://www.wpzoom.com/
+License: GPL v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+*/
+#search button {
+	text-indent:-400000px
+}
